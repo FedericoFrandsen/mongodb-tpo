@@ -2,45 +2,50 @@ from pymongo import MongoClient
 from py2neo import Graph
 import redis
 
+_db = None
+_graph = None
+_r = None
 
 def conectar_mongo():
+    global _db
+    if _db is not None:
+        return _db
     try:
         client = MongoClient(
             "mongodb://admin:password123@localhost:27017/",
-            authSource="admin"
+            authSource="admin",
         )
-        db = client["tpo_database"]
+        _db = client["tpo_database"]
         print("Conectado a MongoDB")
-        return db
     except Exception as e:
         print("Error conectando a MongoDB:", e)
-        return None
-
+        _db = None
+    return _db
 
 def conectar_neo4j():
+    global _graph
+    if _graph is not None:
+        return _graph
     try:
-        graph = Graph("bolt://localhost:7687", auth=("neo4j", "devpass123"))
+        _graph = Graph("bolt://localhost:7687", auth=("neo4j", "devpass123"))
         print("Conectado a Neo4j")
-        return graph
     except Exception as e:
         print("Error conectando a Neo4j:", e)
-        return None
-
+        _graph = None
+    return _graph
 
 def conectar_redis():
+    global _r
+    if _r is not None:
+        return _r
     try:
-        r = redis.Redis(
-            host="localhost",
-            port=6379,
-            db=0,
-            decode_responses=True  # <- clave: devuelve strings en lugar de bytes
-        )
-        r.ping()
+        _r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+        _r.ping()
         print("Conectado a Redis")
-        return r
     except Exception as e:
         print("Error conectando a Redis:", e)
-        return None
+        _r = None
+    return _r
 
 if __name__ == "__main__":
     conectar_mongo()
