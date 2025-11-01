@@ -1,4 +1,4 @@
-from conexion_nosql import conectar_mongo, conectar_neo4j, conectar_redis
+from services.conexion_nosql import conectar_mongo, conectar_neo4j, conectar_redis
 
 
 # Conexiones

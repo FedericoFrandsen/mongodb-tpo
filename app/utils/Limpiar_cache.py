@@ -1,5 +1,5 @@
-from conexion_nosql import conectar_redis
-from funciones import clear_offer_cache
+from services.conexion_nosql import conectar_redis
+from services.funciones import clear_offer_cache
 
 ofertas = ["of-backend", "of-analista-datos", "of-especialista-ia"]
 

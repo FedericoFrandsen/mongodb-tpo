@@ -1,7 +1,7 @@
 # main.py
 import argparse
-from conexion_nosql import conectar_mongo, conectar_neo4j, conectar_redis
-from funciones import get_recommendations
+from services.conexion_nosql import conectar_mongo, conectar_neo4j, conectar_redis
+from services.funciones import get_recommendations
 
 def parse_args():
     p = argparse.ArgumentParser(description="Runner Talentum+")
