@@ -6,6 +6,6 @@ from app.api.recs import router as recs_router
 
 app = FastAPI(title="Talentum+ API")
 app.include_router(users_router)
-#app.include_router(skills_router)
-#app.include_router(segment_router)
-#app.include_router(recs_router)
+app.include_router(skills_router)
+app.include_router(segment_router)
+app.include_router(recs_router)
