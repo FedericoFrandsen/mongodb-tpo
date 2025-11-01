@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pymongo
+redis
+py2neo
+pydantic
