@@ -1,28 +1,11 @@
-# main.py
-import argparse
-from services.conexion_nosql import conectar_mongo, conectar_neo4j, conectar_redis
-from services.funciones import get_recommendations
+from fastapi import FastAPI
+from app.api.users import router as users_router
+from app.api.skills import router as skills_router
+from app.api.segment import router as segment_router
+from app.api.recs import router as recs_router
 
-def parse_args():
-    p = argparse.ArgumentParser(description="Runner Talentum+")
-    p.add_argument("--oferta", default="of-backend", help="ID de oferta (ej.: of-backend)")
-    return p.parse_args()
-
-def main():
-    args = parse_args()
-    db = conectar_mongo()
-    graph = conectar_neo4j()
-    r = conectar_redis()
-
-    # IMPORTANTE: comparar explícitamente con None (PyMongo no soporta truthy)
-    if any(x is None for x in (db, graph, r)):
-        print("Falta alguna conexión (Mongo/Neo4j/Redis).")
-        return
-
-    result = get_recommendations(db, graph, r, args.oferta)
-    print(f"Fuente: {result['source']}")
-    print("Recomendaciones:", result["recs"])
-    print("Perfiles:", result["perfiles"])
-
-if __name__ == "__main__":
-    main()
+app = FastAPI(title="Talentum+ API")
+app.include_router(users_router)
+#app.include_router(skills_router)
+#app.include_router(segment_router)
+#app.include_router(recs_router)

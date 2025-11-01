@@ -1,0 +1,7 @@
+#Ejecturar desde terminal
+
+$env:PYTHONPATH="."
+uvicorn app.main:app --reload
+
+
+abrir :  http://127.0.0.1:8000/docs
