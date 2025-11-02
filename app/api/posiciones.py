@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from app.services.conexion_nosql import conectar_mongo
 
-router = APIRouter(prefix="/positions", tags=["positions"])
+router = APIRouter(prefix="/posiciones", tags=["posiciones"])
 
 class ReqItem(BaseModel):
     habilidad: str
