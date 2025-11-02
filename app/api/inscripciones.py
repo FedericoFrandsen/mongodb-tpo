@@ -3,7 +3,11 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-from app.services.conexion_nosql import conectar_mongo, conectar_neo4j
+from app.services.conexion_nosql import (
+    conectar_mongo,
+    conectar_neo4j,
+    conectar_redis,
+)
 from app.services.versiones import log_version, get_candidato_id_by_nombre
 
 router = APIRouter(prefix="/inscripciones", tags=["inscripciones"])
@@ -27,6 +31,7 @@ class ProgresoIn(BaseModel):
 def inscribirse(inf: InscripcionIn):
     """
     Inscribe a un usuario en un curso (colección inscripciones).
+    Impacta: Mongo (inscripciones) + versiones_perfil
     """
     db = conectar_mongo()
     if db is None:
@@ -73,11 +78,14 @@ def inscribirse(inf: InscripcionIn):
 def actualizar_progreso(p: ProgresoIn):
     """
     Actualiza el progreso de una inscripción. Si completar=True:
-      - marca fecha_fin
-      - si sumar_skill y el curso tiene skill_asociada, agrega la skill al usuario
-      - guarda versión en el historial
+      - marca fecha_fin en Mongo
+      - si sumar_skill y el curso tiene skill_asociada, agrega la skill al usuario (Mongo)
+      - agrega el usuario al índice Redis skill:{skill}:users
+      - refleja en Neo4j: (Usuario)-[:REALIZO]->(Curso) y (Usuario)-[:TIENE]->(Skill)
+      - registra versión en versiones_perfil
     """
     db = conectar_mongo()
+    r = conectar_redis()
     if db is None:
         raise HTTPException(500, "Mongo no disponible")
 
@@ -96,6 +104,7 @@ def actualizar_progreso(p: ProgresoIn):
     if not insc:
         raise HTTPException(404, "No hay inscripción para ese curso")
 
+    # Update de progreso/nota/fecha_fin
     upd = {
         "progreso": p.progreso if p.progreso is not None else insc.get("progreso", 0),
         "nota": p.nota if p.nota is not None else insc.get("nota", None),
@@ -116,7 +125,11 @@ def actualizar_progreso(p: ProgresoIn):
         )
         added_skill = skill
 
-    # Registrar versión
+        # Redis: índice skill:{skill}:users
+        if r is not None:
+            r.sadd(f"skill:{added_skill}:users", user)
+
+    # Versión (historial)
     diff = {"curso": curso, "progreso": upd["progreso"], "nota": upd["nota"]}
     if p.completar:
         diff["completado"] = True
@@ -129,6 +142,30 @@ def actualizar_progreso(p: ProgresoIn):
         cambio=f"Actualizó progreso en curso {curso}" if not p.completar else f"Completó curso {curso}",
         diff=diff
     )
+
+    # Neo4j: reflejar (Usuario)-[:REALIZO]->(Curso) al completar
+    if p.completar:
+        graph = conectar_neo4j()
+        if graph is not None:
+            # MERGE Usuario y Curso
+            graph.run(
+                """
+                MERGE (u:Usuario {nombre:$user})
+                MERGE (c:Curso {titulo:$curso})
+                MERGE (u)-[:REALIZO]->(c)
+                """,
+                user=user, curso=curso
+            )
+            # MERGE skill en Neo4j si fue agregada
+            if added_skill:
+                graph.run(
+                    """
+                    MERGE (u:Usuario {nombre:$user})
+                    MERGE (s:Skill {nombre:$skill})
+                    MERGE (u)-[:TIENE]->(s)
+                    """,
+                    user=user, skill=added_skill
+                )
 
     return {
         "ok": True,
@@ -145,6 +182,7 @@ def actualizar_progreso(p: ProgresoIn):
 def cursos_de_usuario(nombre: str):
     """
     Lista cursos (inscripciones) del usuario con progreso/nota y metadata del curso.
+    Impacta: solo lectura en Mongo
     """
     db = conectar_mongo()
     if db is None:
