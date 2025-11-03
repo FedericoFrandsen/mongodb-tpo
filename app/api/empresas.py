@@ -1,4 +1,3 @@
-# app/api/empresas.py
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
