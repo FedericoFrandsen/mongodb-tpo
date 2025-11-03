@@ -33,6 +33,12 @@ class CapacitacionRequest(BaseModel):
     capacitacion: str
 #CapacitacionRequest se usa para agregar una capacitación a un usuario
 
+class UpdateUserIn(BaseModel):
+    email: Optional[EmailStr] = None
+    celular: Optional[str] = None
+    residencia: Optional[str] = None
+#UpdateUserIn permite modificar los datos de un usuario
+
 # ----------------------------
 # Crear usuario
 # ----------------------------
@@ -117,6 +123,37 @@ def create_user(u: UserIn):
         print("ERROR create_user:", repr(e))
         raise HTTPException(500, "Error interno creando usuario")
 
+# -----------------------------
+# Actualizar Usuario
+# -----------------------------
+@router.put("/{nombre}")
+def update_user(nombre: str, data: UpdateUserIn):
+    db = conectar_mongo()
+    r = conectar_redis()
+    if db is None or r is None:
+        raise HTTPException(500, "Conexiones no disponibles")
+
+    nombre = nombre.strip().lower()
+    set_doc = {}
+    if data.email is not None:
+        set_doc["informacion_personal.email"] = data.email
+    if data.celular is not None:
+        set_doc["informacion_personal.celular"] = data.celular
+    if data.residencia is not None:
+        set_doc["informacion_personal.residencia"] = data.residencia
+    if not set_doc:
+        return {"ok": True, "updated": 0}
+
+    res = db.candidatos.update_one({"informacion_personal.nombre_apellido": nombre}, {"$set": set_doc})
+    r.delete(f"user:{nombre}")
+    #Borra la copia en caché en Redis del perfil de ese usuario
+
+    # Versionado
+    cand_id = get_candidato_id_by_nombre(db, nombre)
+    if cand_id:
+        log_version(db, cand_id, cambio="Usuario actualizado", diff=set_doc)
+
+    return {"ok": True, "updated": res.modified_count}
 
 # ----------------------------
 # Agregar capacitación a un usuario
