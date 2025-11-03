@@ -1,0 +1,245 @@
+/* app.css */
+
+/* app.css */
+
+/* Body y contenedor general */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Navbar */
+nav {
+  background-color: #007bff;
+  padding: 10px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+nav a:hover {
+  color: #ffeb3b;
+}
+
+/* Card general para formularios y resultados */
+.card {
+  background-color: #fff;
+  padding: 20px 25px;
+  max-width: 500px;
+  margin: 20px auto;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Título */
+.card h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Inputs */
+.card input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.card input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.card button,
+button {
+  display: block;
+  margin: 10px auto;
+  padding: 8px 20px;
+  font-size: 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: auto;
+}
+
+.card button:hover,
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Mensajes */
+.card p {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* Resultados de búsqueda y detalles */
+.card div {
+  text-align: left;
+  margin-top: 15px;
+}
+
+/* Lista de versiones */
+.card ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-top: 10px;
+}
+
+/* Botones pequeños dentro de cards */
+.card button:not(:first-child) {
+  margin-top: 10px;
+}
+
+/* Ajuste responsive */
+@media (max-width: 600px) {
+  .card {
+    width: 90%;
+    padding: 15px 20px;
+  }
+}
+
+/* Header con botones centrados */
+.header-buttons {
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+  gap: 20px;               /* Espacio entre botones */
+  margin-bottom: 20px;     /* Separación del contenido */
+}
+
+.header-buttons a {
+  padding: 10px 20px;
+  font-size: 15px;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.header-buttons a:hover {
+  background-color: #0056b3;
+}
+
+/* Contenedor del contenido centrado */
+.main-content {
+  display: flex;
+  justify-content: center; /* Centra horizontalmente */
+}
+
+.user-details {
+  text-align: left;
+  font-size: 13px; /* un poquito más pequeña */
+  line-height: 1.4;
+  margin-top: 15px;
+}
+
+.user-details p {
+  margin: 5px 0;
+}
+
+/* Contenedor de versiones */
+.versiones-container {
+  margin-top: 15px;
+}
+
+/* Cada versión */
+.version-item {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+/* Encabezado de versión */
+.version-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Tabla de diffs */
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.diff-table th,
+.diff-table td {
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.diff-table th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+/* Botón pequeño dentro de card */
+.card .small-btn {
+  width: 150px;
+  padding: 8px;
+  font-size: 13px;
+  margin: 5px auto 10px;
+  display: block;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.card .small-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Ajuste para tablas de diffs con contenido largo */
+.diff-table td {
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  text-align: left;
+  max-width: 200px; /* Limita el ancho máximo */
+  word-wrap: break-word; /* Hace wrap de palabras largas */
+  overflow-wrap: break-word;
+}
+
+/* Opcional: que la tabla pueda hacer scroll horizontal si es muy ancha */
+.versiones-container {
+  margin-top: 15px;
+  overflow-x: auto; /* scroll horizontal si es necesario */
+}
+
+/* Mantener el encabezado fijo (opcional si querés versión profesional) */
+.diff-table th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+}

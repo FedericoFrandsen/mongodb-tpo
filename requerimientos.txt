@@ -1,6 +1,8 @@
-fastapi
-uvicorn
-pymongo
-redis
-py2neo
-pydantic
+Librerías a instalar:
+- FastAPI (Es un framework para crear APIs web en Python, permite definir rutas, recibir y enviar datos, y documentar automáticamente la API)
+- Uvicorn (Es un servidor ASGI que corre aplicaciones de FastAPI, permite que tu API funcione y reciba solicitudes HTTP)
+  uvicorn main:app --reload
+- Pymongo (Es la librería que conecta Python con MongoDB)
+- Redis (Es la librería que conecta Python con Redis)
+- Py2neo (Es la librería que conecta Python con Neo4j)
+- Pydantic (Librería que permite validar y transformar datos en Python, para asegurarse de que los datos que entran y salen de la API cumplan ciertas reglas: tipo, formato, obligatorio/no obligatorio, etc)

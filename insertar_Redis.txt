@@ -1,0 +1,77 @@
+SET token:usuario:rosario "jwt_abc123ros" EX 3600
+SET token:usuario:marcos "jwt_def456mar" EX 3600
+SET token:usuario:camila "jwt_ghi789cam" EX 3600
+
+HSET sess:rosario token "jwt_abc123ros" role "candidato" lastLogin "2025-10-16T11:30:00Z"
+EXPIRE sess:rosario 3600
+
+HSET sess:marcos token "jwt_def456mar" role "candidato" lastLogin "2025-10-16T11:32:00Z"
+EXPIRE sess:marcos 3600
+
+HSET sess:camila token "jwt_ghi789cam" role "candidato" lastLogin "2025-10-16T11:35:00Z"
+EXPIRE sess:camila 3600
+
+HSET busqueda:usuario:rosario puesto "Desarrollador Backend" ubicacion "Remoto" experiencia "Junior"
+EXPIRE busqueda:usuario:rosario 300
+
+HSET busqueda:usuario:marcos puesto "Analista de Datos" ubicacion "CABA" experiencia "Semi Senior"
+EXPIRE busqueda:usuario:marcos 300
+
+HSET busqueda:usuario:camila puesto "Especialista en IA" ubicacion "CABA" experiencia "Senior"
+EXPIRE busqueda:usuario:camila 300
+
+ZADD cache:match:of-backend 10 "cand-marcos" 8 "cand-rosario"
+EXPIRE cache:match:of-backend 900
+
+ZADD cache:match:of-analista-datos 9 "cand-rosario" 7 "cand-camila"
+EXPIRE cache:match:of-analista-datos 900
+
+ZADD cache:match:of-especialista-ia 10 "cand-camila"
+EXPIRE cache:match:of-especialista-ia 900
+
+INCR cnt:post:of-backend:20251016T1130
+INCR cnt:post:of-backend:20251016T1130
+EXPIRE cnt:post:of-backend:20251016T1130 7200
+
+INCR cnt:post:of-analista-datos:20251016T1130
+EXPIRE cnt:post:of-analista-datos:20251016T1130 7200
+
+INCR cnt:post:of-especialista-ia:20251016T1130
+EXPIRE cnt:post:of-especialista-ia:20251016T1130 7200
+
+SET cnt:view:profile:rosario:20251016 45
+EXPIRE cnt:view:profile:rosario:20251016 86400
+
+SET cnt:view:profile:marcos:20251016 32
+EXPIRE cnt:view:profile:marcos:20251016 86400
+
+SET cnt:view:profile:camila:20251016 18
+EXPIRE cnt:view:profile:camila:20251016 86400
+
+INCRBY cnt:view:offer:of-backend:20251016T1130 15
+EXPIRE cnt:view:offer:of-backend:20251016T1130 60
+
+INCRBY cnt:view:offer:of-analista-datos:20251016T1130 8
+EXPIRE cnt:view:offer:of-analista-datos:20251016T1130 60
+
+INCRBY cnt:view:offer:of-especialista-ia:20251016T1130 5
+EXPIRE cnt:view:offer:of-especialista-ia:20251016T1130 60
+
+SET lock:match:of-backend "worker-1" NX EX 10
+SET lock:post:of-backend "worker-2" NX EX 10
+
+HSET profile:rosario nombre "Rosario Martinez" estado "activo" residencia "CABA" habilidades '["SQL","Power BI","Excel","Python"]'
+
+HSET profile:marcos nombre "Marcos Pereyra" estado "activo" residencia "CABA" habilidades '["Node.js","JavaScript","MongoDB","APIs REST"]'
+
+HSET profile:camila nombre "Camila Gebara" estado "activo" residencia "Santa Fe" habilidades '["Machine Learning","Python","TensorFlow","Data Analysis"]'
+
+HSET profile:tech nombre "Tech Solutions" industria "Software"
+HSET profile:data nombre "Data Corp" industria "Consultoría"
+HSET profile:innova nombre "Innovatech" industria "Tecnología"
+
+HSET profile:of-backend puesto "Desarrollador Backend" ubicacion "Remoto" modalidad "remoto" estado "abierta" requisitos '["Node.js","Express","MongoDB","APIs REST"]'
+
+HSET profile:of-analista-datos puesto "Analista de Datos" ubicacion "CABA" modalidad "presencial" estado "abierta" requisitos '["SQL","Power BI","Python","Estadística"]'
+
+HSET profile:of-especialista-ia puesto "Especialista en IA" ubicacion "CABA" modalidad "híbrido" estado "abierta" requisitos '["Machine Learning","Python","TensorFlow","Análisis de datos"]'

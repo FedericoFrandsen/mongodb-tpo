@@ -108,7 +108,9 @@ def segment_by_skills(skills: List[str] = Query(..., min_items=1)):
     if not skills_norm:
         raise HTTPException(400, "Debe proveer al menos un skill")
 
-    keys = [f"skill:{s}:users" for s in skills_norm]
+    keys = [f"skill:{s}:users" for s in skills_norm] 
+    #Cada skill tiene un set en Redis que contiene los usuarios que la tienen
+    #skill:python:users = { "trinidad echevarria", "rosario martinez" }
     if len(keys) == 1:
         users = r.smembers(keys[0])
     else:
@@ -128,3 +130,9 @@ def segment_by_skills(skills: List[str] = Query(..., min_items=1)):
         )
     )
     return {"skills": skills_norm, "users": users, "perfiles": perfiles}
+
+#Usuario pide: /skills/segment?skills=python&skills=sql
+#Redis → obtiene usuarios que tienen cada skill
+#Intersección → usuarios que cumplen todas las skills
+#Mongo → obtiene perfiles completos de esos usuarios
+#Retorna JSON con todo

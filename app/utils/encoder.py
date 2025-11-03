@@ -8,3 +8,5 @@ def custom_jsonable_encoder(obj):
     if isinstance(obj, dict):
         return {k: custom_jsonable_encoder(v) for k, v in obj.items()}
     return obj
+
+#Convierte todo lo que viene de Mongo (ObjectIds, listas, diccionarios) en algo serializable a JSON
