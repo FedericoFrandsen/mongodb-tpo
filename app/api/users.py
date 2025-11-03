@@ -17,7 +17,7 @@ import json
 
 
 router = APIRouter(prefix="/users", tags=["users"])
-
+#Todas las rutas de este archivo van a empezar con /users
 
 # ----------------------------
 # Modelos de request
@@ -26,12 +26,12 @@ class UserIn(BaseModel):
     nombre: str
     email: EmailStr
     skills: list[str] = []
-
+#UserIn define cómo debe ser el JSON al crear un usuario
 
 class CapacitacionRequest(BaseModel):
     nombre: str
     capacitacion: str
-
+#CapacitacionRequest se usa para agregar una capacitación a un usuario
 
 # ----------------------------
 # Crear usuario
@@ -82,6 +82,7 @@ def create_user(u: UserIn):
         # Redis: índices por skill
         for s in skills_norm:
             r.sadd(f"skill:{s}:users", nombre)
+        #Actualiza índices en Redis para búsquedas rápidas por skill
 
         # Cache perfil
         payload = json.dumps(
@@ -94,6 +95,7 @@ def create_user(u: UserIn):
             default=str,  # serializa datetime
         )
         r.setex(f"user:{nombre}", 1800, payload)
+        #Guarda un cache del perfil en Redis por 30 minutos (setex).
 
         # Versionado en Mongo
         log_version(
@@ -138,6 +140,7 @@ def add_capacitacion(req: CapacitacionRequest):
         {"informacion_personal.nombre_apellido": nombre},
         {"$push": {"capacitaciones": cap}},
     )
+    # Actualiza MongoDB ($push para agregar la capacitación)
 
     # Neo4j: MERGE (Usuario)-[:REALIZO]->(Capacitacion)
     driver = graph  # py2neo.Graph si lo usás así
@@ -221,3 +224,14 @@ def get_versiones(nombre: str):
         {"_id": 0, "candidato_id": 0},
     ).sort("version", 1)
     return {"nombre": nombre, "versiones": list(cur)}
+
+#Busca el ID del candidato en MongoDB
+#Recupera el historial de versiones de la colección versiones_perfil
+#Devuelve un JSON con todas las versiones ordenadas por número de versión
+
+#Resumen
+# 1) Crear usuario → MongoDB + Redis + versionado
+# 2) Agregar capacitación → MongoDB + Neo4j + versionado
+# 3) Obtener usuario → MongoDB
+# 4) Eliminar usuario → MongoDB + Redis
+# 5) Historial → MongoDB

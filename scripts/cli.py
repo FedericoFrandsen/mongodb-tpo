@@ -1,4 +1,5 @@
 import argparse
+
 from app.services.conexion_nosql import (
   conectar_mongo,
   conectar_neo4j,
@@ -33,21 +34,28 @@ def main():
     if any(x is None for x in (db, graph, r)):
         print("Falta alguna conexión (Mongo/Neo4j/Redis).")
         return
+    #Si alguna conexión falla, el programa termina y avisa
 
     if args.cmd == "recs":
         res = get_recommendations(db, graph, r, args.oferta)
         print(f"Fuente: {res['source']}")
         print("Recs:", res["recs"])
         print("Perfiles:", res["perfiles"])
+    #Llama a la función que devuelve recomendaciones para la oferta
+    #Imprime la fuente, las recomendaciones y los perfiles asociados
 
     elif args.cmd == "recompute":
         items = recompute_matches(db, graph, r, args.oferta)
         print("Recomputadas:", len(items))
         print(items)
+    #Recalcula todas las recomendaciones y refresca la cache de Redis
+    #Imprime cuántos ítems fueron recomputados
 
     elif args.cmd == "invalidate":
         deleted = clear_offer_cache(r, args.oferta)
         print("Eliminadas:", deleted)
+    #Borra la cache de la oferta específica en Redis
+    #Imprime cuántos elementos se eliminaron
 
 if __name__ == "__main__":
     main()
