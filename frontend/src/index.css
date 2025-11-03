@@ -1,0 +1,29 @@
+/* index.css -> estilos globales, resets, y cosas que se aplican a toda la app */
+
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Fuente y fondo global */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Para enlaces por si los usas */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Contenedor general de la app */
+#root {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

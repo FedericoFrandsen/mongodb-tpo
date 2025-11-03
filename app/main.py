@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 #Rutas 
 from app.api.users import router as users_router
@@ -24,3 +25,12 @@ app.include_router(cursos_router)       # /cursos
 app.include_router(inscripciones_router) # /inscripciones
 
 #Agrega cada módulo de endpoints a la aplicación principal
+
+# Configuración CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # permite POST, GET, OPTIONS, etc.
+    allow_headers=["*"],
+)
