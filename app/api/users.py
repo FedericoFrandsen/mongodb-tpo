@@ -13,8 +13,8 @@ from app.services.versiones import (
     get_candidato_id_by_nombre,
 )
 
+from bson import json_util
 import json
-
 
 router = APIRouter(prefix="/users", tags=["users"])
 #Todas las rutas de este archivo van a empezar con /users
@@ -25,6 +25,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 class UserIn(BaseModel):
     nombre: str
     email: EmailStr
+    celular: Optional[str] = None
+    residencia: Optional[str] = None
     skills: list[str] = []
 #UserIn define cómo debe ser el JSON al crear un usuario
 
@@ -46,6 +48,7 @@ class UpdateUserIn(BaseModel):
 def create_user(u: UserIn):
     db = conectar_mongo()
     r = conectar_redis()
+    graph = conectar_neo4j()
     if db is None or r is None:
         raise HTTPException(500, "Conexiones no disponibles")
 
@@ -64,8 +67,8 @@ def create_user(u: UserIn):
             "informacion_personal": {
                 "nombre_apellido": nombre,
                 "email": u.email,
-                "celular": None,
-                "residencia": None,
+                "celular": u.celular,
+                "residencia": u.residencia,
                 "foto": None,
                 "CV": None,
             },
@@ -114,6 +117,34 @@ def create_user(u: UserIn):
                 "habilidades": doc["habilidades"],
             },
         )
+
+        #Crear nodo en Neo4j
+        graph.run(
+            """
+            MERGE (u:Usuario {nombre:$nombre})
+            SET u.email = $email,
+                u.celular = $celular,
+                u.residencia = $residencia,
+                u.estado = 'activo',
+                u.fecha_creacion = datetime()
+            """,
+            nombre=nombre,
+            email=u.email,
+            celular=u.celular,
+            residencia=u.residencia,
+        )
+
+        #Crear relaciones con las skills
+        for s in skills_norm:
+            graph.run(
+                """
+                MERGE (u:Usuario {nombre:$nombre})
+                MERGE (h:Habilidad {nombre:$skill})
+                MERGE (u)-[:TIENE_HABILIDAD]->(h)
+                """,
+                nombre=nombre,
+                skill=s
+            )
 
         return {"ok": True, "user": nombre}
 
@@ -204,24 +235,35 @@ def add_capacitacion(req: CapacitacionRequest):
     return {"message": f"Capacitación '{cap}' agregada a '{nombre}'"}
 
 
+import re
+
 # ----------------------------
 # Obtener usuario por nombre
 # ----------------------------
 @router.get("/{nombre}")
 def get_user(nombre: str):
-    db = conectar_mongo()
-    if db is None:
-        raise HTTPException(500, "Conexión Mongo no disponible")
+    try:
+        db = conectar_mongo()
+        if db is None:
+            raise HTTPException(500, "Conexión Mongo no disponible")
 
-    nombre = nombre.strip().lower()
-    user = db.candidatos.find_one(
-        {"informacion_personal.nombre_apellido": nombre},
-        {"_id": 0}
-    )
-    if not user:
-        return {"error": "Usuario no encontrado"}
-    return user
+        regex = re.compile(f"^{re.escape(nombre.strip())}$", re.IGNORECASE)
+        user = db.candidatos.find_one(
+            {"informacion_personal.nombre_apellido": regex}
+        )
 
+        if not user:
+            raise HTTPException(404, f"Usuario '{nombre}' no encontrado")
+
+        #Serializamos correctamente ObjectId y fechas
+        user_json = json.loads(json_util.dumps(user))
+        return user_json
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("ERROR get_user:", repr(e))
+        raise HTTPException(500, f"Error interno: {e}")
 
 # ----------------------------
 # Eliminar usuario por nombre
@@ -230,16 +272,28 @@ def get_user(nombre: str):
 def delete_user(nombre: str):
     db = conectar_mongo()
     r = conectar_redis()
+    graph = conectar_neo4j() 
     if db is None or r is None:
         raise HTTPException(500, "Conexiones no disponibles")
 
     nombre = nombre.strip().lower()
-    res = db.candidatos.delete_one(
-        {"informacion_personal.nombre_apellido": nombre}
-    )
-    # Opcional: limpiar índices de Redis (si lo querés)
-    # Podrías recorrer sus skills primero y hacer SREM por cada skill.
+    res = db.candidatos.delete_one({
+        "informacion_personal.nombre_apellido": {"$regex": f"^{nombre}$", "$options": "i"}
+    })
+
+    #Borra el cache directo del usuario
     r.delete(f"user:{nombre}")
+
+    # Neo4j: eliminar nodo y todas sus relaciones
+    try:
+        graph.run(
+            "MATCH (u:Usuario {nombre:$nombre}) "
+            "DETACH DELETE u", #para eliminar el nodo y todas sus relaciones
+            nombre=nombre
+        )
+    except Exception as e:
+        print("ERROR eliminando en Neo4j:", repr(e))
+
     return {"deleted": res.deleted_count}
 
 

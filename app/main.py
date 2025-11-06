@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 #Rutas 
 from app.api.users import router as users_router
 from app.api.skills import router as skills_router
-from app.api.segment import router as segment_router
 from app.api.recs import router as recs_router
 from app.api.empresas import router as empresas_router
 from app.api.posiciones import router as posiciones_router
@@ -16,7 +15,6 @@ app = FastAPI(title="Talentum+ API")
 
 app.include_router(users_router)        # /users
 app.include_router(skills_router)       # /skills
-app.include_router(segment_router)      # /segment
 app.include_router(recs_router)         # /offers/...
 app.include_router(empresas_router)     # /empresas
 app.include_router(posiciones_router)   # /posiciones
