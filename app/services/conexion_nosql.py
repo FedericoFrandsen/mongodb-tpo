@@ -2,11 +2,10 @@ from pymongo import MongoClient
 from py2neo import Graph
 import redis
 
+#Guarda la conexión
 _db = None
 _graph = None
 _r = None
-#Se usan para guardar la conexión y no volver a conectarse cada vez que se llama a la función
-#Esto mejora el rendimiento y evita abrir muchas conexiones
 
 def conectar_mongo():
     global _db
@@ -41,7 +40,7 @@ def conectar_redis():
     if _r is not None:
         return _r
     try:
-        _r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True) #decode_responses=True → convierte los datos de bytes a strings
+        _r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)                  #decode_responses=True → convierte los datos de bytes a strings
         _r.ping()
         print("Conectado a Redis")
     except Exception as e:
